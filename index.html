@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlowGrip Prototype - Full Features</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+        body { font-family: 'Kanit', sans-serif; }
+        ::-webkit-scrollbar { width: 0px; }
+        .arrow-active { color: #52C2C2; transform: scale(1.2); transition: all 0.3s ease; }
+        .arrow-inactive { color: #e2e8f0; transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen flex justify-center items-center p-4">
+
+    <div class="w-full max-w-md bg-[#F4F9FC] h-[840px] rounded-[40px] shadow-2xl overflow-hidden relative border-8 border-slate-800 flex flex-col">
+        
+        <!-- ================= LOGIN SCREEN ================= -->
+        <div id="screen-login" class="flex-1 flex flex-col justify-center p-8 bg-white overflow-y-auto">
+            <div class="text-center mb-8">
+                <div class="mx-auto w-24 h-24 mb-2 text-[#52C2C2] flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+                        <path d="M12 22c-2.4 0-4.5-1.5-5.5-3.5-.8-1.5-.5-3.5.5-5 .6-.8 1-1.8 1-2.8V9c0-2.8 2.2-5 5-5s5 2.2 5 5v1.7c0 1 .4 2 1 2.8 1 1.5 1.3 3.5.5 5-1 2-3.1 3.5-5.5 3.5z"></path>
+                        <path d="M12 22v-4"></path>
+                        <path d="M20 7 l2 -2 m0 4 l-2 -2 m2 0 h3" stroke-width="1" class="text-[#52C2C2] opacity-70"></path>
+                    </svg>
+                </div>
+                <h1 class="text-[32px] font-semibold text-[#52C2C2] tracking-wide mb-1">GlowGrip</h1>
+                <p class="text-slate-500 text-[15px] leading-snug">ตรวจสุขภาพช่องปาก<br>ง่าย ๆ แค่แปรงฟัน</p>
+            </div>
+
+            <div class="space-y-4">
+                <div id="div-name-field" class="hidden relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"><i class="far fa-id-card"></i></span>
+                    <input type="text" id="auth-name" placeholder="ชื่อ-นามสกุล" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#52C2C2] text-sm transition-colors">
+                </div>
+
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"><i class="far fa-user"></i></span>
+                    <input type="email" id="auth-email" placeholder="Username / Email" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#52C2C2] text-sm transition-colors">
+                </div>
+
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"><i class="fas fa-lock"></i></span>
+                    <input type="password" id="auth-password" placeholder="Password" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#52C2C2] text-sm transition-colors">
+                </div>
+                
+                <button id="btn-primary-auth" onclick="handlePrimaryAuth()" class="w-full bg-[#52C2C2] hover:bg-[#43a8a8] text-white font-medium py-3.5 rounded-xl transition-colors shadow-lg shadow-[#52C2C2]/30 text-base mt-4">
+                    เข้าสู่ระบบ
+                </button>
+                
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-slate-100"></div>
+                    <span class="flex-shrink mx-4 text-slate-400 text-[12px]">หรือเชื่อมต่อด้วย</span>
+                    <div class="flex-grow border-t border-slate-100"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-3">
+                    <button onclick="loginWithGoogle()" class="flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium py-3 rounded-xl text-sm">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg> เข้าสู่ระบบด้วย Google
+                    </button>
+                </div>
+            </div>
+            <p class="text-center text-[13px] text-slate-500 mt-8" id="auth-toggle-text">
+                ยังไม่มีบัญชี? <a href="#" onclick="toggleAuthMode(true)" class="text-[#52C2C2] font-medium hover:underline">สมัครสมาชิก</a>
+            </p>
+        </div>
+
+        <!-- ================= MAIN DASHBOARD ================= -->
+        <div id="screen-main" class="flex-1 flex flex-col p-5 overflow-y-auto bg-[#F4F9FC] hidden">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-xs text-slate-500 flex items-center gap-1">สวัสดีตอนเช้า 👋</p>
+                    <h2 class="text-lg font-bold text-slate-800" id="main-user-name">กำลังโหลด...</h2>
+                    <button onclick="handleLogout()" class="text-[11px] text-red-500 hover:underline mt-0.5 flex items-center gap-1">
+                        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                    </button>
+                </div>
+                <button class="w-8 h-8 bg-white border border-slate-100 rounded-full flex items-center justify-center text-slate-700 shadow-sm relative">
+                    <i class="far fa-bell text-sm"></i>
+                    <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                </button>
+            </div>
+
+            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 mb-4">
+                <h3 class="text-xs font-bold text-slate-700 mb-3">ภาพรวมสุขภาพช่องปากวันนี้</h3>
+                <div class="flex items-center gap-4">
+                    <div class="w-1/2 flex flex-col items-center border-r border-slate-100 pr-2">
+                        <div class="relative w-24 h-24 flex items-center justify-center">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="score-circle-path" class="text-teal-400 transition-all duration-700" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="absolute flex flex-col items-center justify-center">
+                                <span class="text-2xl font-bold text-slate-800" id="main-score">--</span>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1 font-medium tracking-wide">Oral Health Score</p>
+                        <span id="main-status-badge" class="mt-1 bg-slate-100 text-slate-600 px-3 py-0.5 rounded-full text-[11px] font-medium">กำลังโหลด...</span>
+                    </div>
+
+                    <div class="w-1/2 space-y-2.5 pl-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-500 text-xs shrink-0"><i class="fas fa-sparkles text-[10px]"></i></div>
+                            <div>
+                                <p class="text-[9px] text-slate-400 leading-none mb-0.5">Brushing Quality</p>
+                                <span class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-semibold">ดีมาก</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center text-blue-500 text-xs shrink-0"><i class="far fa-calendar-alt text-[10px]"></i></div>
+                            <div>
+                                <p class="text-[9px] text-slate-400 leading-none mb-0.5">Last Scan</p>
+                                <span class="text-[11px] font-semibold text-slate-700" id="main-date">--</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-500 text-xs shrink-0"><i class="fas fa-shield-halved text-[10px]"></i></div>
+                            <div>
+                                <p class="text-[9px] text-slate-400 leading-none mb-0.5">Risk Level</p>
+                                <span id="main-risk-badge" class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-semibold">ต่ำ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5 mb-4">
+                <button onclick="startCameraConnection('mapping')" class="bg-gradient-to-b from-indigo-400 to-indigo-500 text-white rounded-2xl p-2.5 flex flex-col items-center justify-center h-32 shadow-sm relative active:scale-95 transition-transform">
+                    <span class="absolute top-2 left-3 text-[11px] font-bold opacity-60">1</span>
+                    <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center mb-1.5 shadow-sm"><i class="fas fa-tooth text-base"></i></div>
+                    <div class="text-center w-full">
+                        <span class="text-[11px] font-semibold block leading-tight">เก็บข้อมูลเริ่มต้น</span>
+                        <span class="text-[9px] opacity-75 block mt-0.5">(Calibration)</span>
+                    </div>
+                </button>
+                <button onclick="startCameraConnection('assessment')" class="bg-gradient-to-b from-[#52C2C2] to-[#42b1b1] text-white rounded-2xl p-2.5 flex flex-col items-center justify-center h-32 shadow-sm relative active:scale-95 transition-transform">
+                    <span class="absolute top-2 left-3 text-[11px] font-bold opacity-60">2</span>
+                    <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center mb-1.5 shadow-sm"><i class="fas fa-expand text-base"></i></div>
+                    <div class="text-center w-full">
+                        <span class="text-[11px] font-semibold block leading-tight">เริ่มตรวจโรค</span>
+                        <span class="text-[9px] opacity-75 block mt-0.5">(Start Scan)</span>
+                    </div>
+                </button>
+                <button onclick="openHistory()" class="bg-gradient-to-b from-blue-400 to-blue-500 text-white rounded-2xl p-2.5 flex flex-col items-center justify-center h-32 shadow-sm relative active:scale-95 transition-transform">
+                    <span class="absolute top-2 left-3 text-[11px] font-bold opacity-60">3</span>
+                    <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center mb-1.5 shadow-sm"><i class="far fa-file-alt text-base"></i></div>
+                    <div class="text-center w-full">
+                        <span class="text-[11px] font-semibold block leading-tight">ประวัติการตรวจ</span>
+                        <span class="text-[9px] opacity-75 block mt-0.5">(History)</span>
+                    </div>
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">
+                <h4 class="text-xs font-bold text-slate-700 mb-3">ข้อมูลสุขภาพเพิ่มเติม</h4>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                        <span class="text-slate-500 text-xs flex items-center gap-2"><i class="fas fa-pen text-teal-400 text-[10px]"></i> แปรงฟันเฉลี่ย / วัน</span>
+                        <span class="font-semibold text-slate-800 text-xs">2.1 ครั้ง</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500 text-xs flex items-center gap-2"><i class="far fa-clock text-teal-400 text-[10px]"></i> ระยะเวลาแปรงฟันเฉลี่ย</span>
+                        <span class="font-semibold text-slate-800 text-xs">1.45 นาที</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ai-recom-box" class="bg-blue-50/70 border border-blue-100 rounded-2xl p-3.5 relative shadow-sm flex gap-3 items-start">
+                <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center shrink-0 mt-0.5"><i class="far fa-lightbulb text-sm"></i></div>
+                <div class="flex-1 pr-4">
+                    <h5 class="text-xs font-bold text-blue-900 mb-0.5">AI แนะนำ</h5>
+                    <p class="text-[11px] text-blue-700 leading-relaxed font-light">พบคราบพลัคสะสมบริเวณฟันกรามซ้าย ควรแปรงฟันให้สะอาดขึ้น และตรวจซ้ำอีกครั้งภายใน 7 วัน</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= LOADING SCREEN ================= -->
+        <div id="screen-loading" class="flex-1 flex flex-col items-center justify-center p-8 bg-slate-900 text-white hidden">
+            <div class="relative w-32 h-32 mb-8 flex items-center justify-center">
+                <div class="absolute w-24 h-24 rounded-full bg-[#52C2C2]/10 animate-ping"></div>
+                <div class="absolute w-32 h-32 rounded-full border border-[#52C2C2]/20 animate-pulse"></div>
+                <div class="absolute inset-0 rounded-full border-2 border-dashed border-slate-700 animate-[spin_12s_linear_infinite]"></div>
+                
+                <div class="relative z-10 flex flex-col items-center text-center">
+                    <div class="flex items-center gap-1.5 text-[#52C2C2] text-4xl mb-1">
+                        <i class="fas fa-toothbrush rotate-45 transform"></i>
+                        <div class="flex gap-0.5 items-end h-7">
+                            <span class="w-1 h-2 bg-cyan-400 rounded-full animate-[pulse_1s_infinite_100ms]"></span>
+                            <span class="w-1 h-4 bg-cyan-400 rounded-full animate-[pulse_1s_infinite_300ms]"></span>
+                            <span class="w-1 h-6 bg-cyan-400 rounded-full animate-[pulse_1s_infinite_500ms]"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h3 class="text-base font-medium text-center px-4 leading-snug tracking-wide">กำลังทำการเชื่อมต่อกับแปรงสีฟัน Glowgrip</h3>
+        </div>
+
+        <!-- ================= SCAN UI (MAPPING & ASSESSMENT) ================= -->
+        <div id="screen-scan-ui" class="flex-1 flex flex-col bg-white hidden">
+            <div class="px-5 pt-6 pb-3 flex items-center gap-3 bg-white z-10">
+                <button onclick="stopScanningAndGoHome()" class="text-slate-600 hover:text-slate-800"><i class="fas fa-arrow-left"></i></button>
+                <div class="flex-1">
+                    <h3 class="text-[15px] font-bold text-slate-800" id="scan-title">ชื่อโหมด</h3>
+                    <p class="text-[11px] text-slate-500" id="scan-subtitle">รายละเอียดโหมด</p>
+                </div>
+            </div>
+            
+            <div class="px-5 pb-4 bg-white z-10">
+                <div class="flex justify-between items-center mb-1.5">
+                    <span class="text-[11px] font-medium text-slate-600">ความครอบคลุมการตรวจภายในช่องปาก</span>
+                    <span class="text-[12px] font-bold text-[#52C2C2]" id="scan-progress-txt">0%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                    <div id="scan-progress-bar" class="bg-[#52C2C2] h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <div class="px-5 relative z-0">
+                <div class="w-full h-60 bg-black rounded-3xl overflow-hidden relative shadow-inner border border-slate-100">
+                    <img id="scan-bg-image" src="" class="absolute inset-0 w-full h-full object-cover opacity-50" alt="Screening">
+                    <div class="absolute inset-0 border-[20px] border-black/40 pointer-events-none rounded-3xl"></div>
+                    <div class="absolute inset-4 border-2 border-cyan-400/40 rounded-2xl animate-pulse"></div>
+                    
+                    <div class="absolute inset-0 flex flex-col items-center justify-center p-4 z-20 text-center">
+                        <div class="bg-black/75 border border-cyan-500/30 rounded-2xl p-3.5 backdrop-blur-xs max-w-[92%] shadow-2xl">
+                            <p class="text-[11.5px] text-cyan-50 leading-relaxed font-light" id="scan-overlay-text"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-[#F9FDFD] mt-4 rounded-t-[32px] border-t border-slate-100 p-5 flex flex-col overflow-y-auto">
+                
+                <!-- UI สำหรับโหมดเก็บข้อมูล (FaceID Style) -->
+                <div id="mapping-ui-container" class="hidden flex-1 flex flex-col items-center justify-center">
+                    <h4 class="text-center text-[13px] font-bold text-slate-700 mb-6 tracking-wide">สแกนโครงสร้างช่องปาก</h4>
+                    <div class="relative w-40 h-40 flex items-center justify-center mb-6">
+                        <!-- วงกลมสแกนรอบๆ -->
+                        <svg class="absolute inset-0 w-full h-full animate-[spin_10s_linear_infinite]" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="48" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="10 5" />
+                            <circle id="mapping-circle" cx="50" cy="50" r="48" fill="none" stroke="#52C2C2" stroke-width="3" stroke-dasharray="0 300" class="transition-all duration-300" />
+                        </svg>
+                        
+                        <i class="fas fa-head-side-mask text-5xl text-slate-300 z-10"></i>
+                        
+                        <!-- ลูกศรชี้ทิศทาง -->
+                        <i id="dir-up" class="fas fa-chevron-up absolute top-0 text-xl arrow-inactive"></i>
+                        <i id="dir-down" class="fas fa-chevron-down absolute bottom-0 text-xl arrow-inactive"></i>
+                        <i id="dir-left" class="fas fa-chevron-left absolute left-0 text-xl arrow-inactive"></i>
+                        <i id="dir-right" class="fas fa-chevron-right absolute right-0 text-xl arrow-inactive"></i>
+                    </div>
+                    <div class="bg-teal-50 text-teal-800 px-4 py-2 rounded-full text-xs font-bold animate-pulse shadow-sm" id="mapping-instruction">
+                        หันแปรงไปทางซ้าย
+                    </div>
+                </div>
+
+                <!-- UI สำหรับโหมดประเมินความเสี่ยง (Checklist) -->
+                <div id="assessment-ui-container" class="hidden flex-1 flex flex-col">
+                    <h4 class="text-center text-[12px] font-bold text-slate-700 mb-3 tracking-wide">จุดที่ต้องทำการตรวจประเมิน</h4>
+                    
+                    <div class="grid grid-cols-2 gap-2 overflow-y-auto max-h-[220px] pr-1" id="scan-grid-container">
+                        <!-- เช็คลิสต์ 9 ตำแหน่ง สร้างผ่าน JS เพื่อให้รูป Icon เข้าใจง่าย -->
+                    </div>
+
+                    <div class="mt-auto pt-3">
+                        <div class="bg-teal-50/70 rounded-xl p-3 flex gap-3 items-center border border-teal-100/50">
+                            <div class="w-6 h-6 bg-[#52C2C2] text-white rounded-full flex items-center justify-center text-[10px] shrink-0 animate-bounce">
+                                <i class="fas fa-navigation"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-teal-900 leading-none mb-1">คำแนะนำจากระบบนำทาง</p>
+                                <p class="text-[10px] text-teal-700 leading-tight" id="scan-live-guide">กำลังเริ่มต้นระบบจับคู่สัญญาณหัวแปรง...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= RESULTS SCREEN ================= -->
+        <div id="screen-results" class="flex-1 flex flex-col p-5 overflow-y-auto bg-white hidden">
+            <div class="text-center my-3">
+                <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-2xl shadow-sm">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">วิเคราะห์ผลเสร็จสิ้น</h3>
+                <p class="text-slate-500 text-xs">ผลประเมินความเสี่ยงจำลองจาก AI ในแต่ละด้าน</p>
+            </div>
+
+            <div class="space-y-2.5 mb-4" id="risk-bars-container"></div>
+
+            <div class="mt-auto space-y-2">
+                <button onclick="saveResultsToFirebase()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20">
+                    <i class="fas fa-cloud-upload-alt"></i> บันทึกประวัติขึ้น Cloud และกลับหน้าหลัก
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= HISTORY SCREEN ================= -->
+        <div id="screen-history" class="flex-1 flex flex-col p-5 bg-[#F4F9FC] hidden">
+            <div class="flex items-center gap-3 mb-4">
+                <button onclick="navigateTo('screen-main')" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 shadow-sm">
+                    <i class="fas fa-arrow-left text-xs"></i>
+                </button>
+                <h3 class="text-lg font-bold text-slate-800">ประวัติการตรวจบนคลาวด์</h3>
+            </div>
+
+            <div class="flex-1 overflow-y-auto space-y-3" id="history-list-container">
+                <div class="text-center text-slate-400 py-12 text-sm" id="history-empty-view">
+                    <i class="fas fa-folder-open text-3xl mb-2 block text-slate-300"></i> ยังไม่มีประวัติการสแกนช่องปาก
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAek23MRGAHOPUV2CjcSRXXwKsMD2qXFo",
+            authDomain: "denticam-iot.firebaseapp.com",
+            projectId: "denticam-iot",
+            storageBucket: "denticam-iot.firebasestorage.app",
+            messagingSenderId: "888173373703",
+            appId: "1:888173373703:web:fe13b1a851ffbd61e53da2"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let isRegisterMode = false;
+        let scanInterval = null;
+        let currentMode = 'mapping'; 
+        let lastHealthScore = 80;
+        let temporaryResults = [];
+
+        const diseases = [
+            { id: 'caries', name: 'ฟันผุ (Dental Caries)', icon: 'fa-tooth' },
+            { id: 'tartar', name: 'คราบหินปูน (Tartar)', icon: 'fa-cubes' },
+            { id: 'periodontitis', name: 'โรคปริทันต์อักเสบ (Periodontitis)', icon: 'fa-disease' },
+            { id: 'wisdom', name: 'ฟันคุดโผล่พ้นเหงือก (Impacted Wisdom)', icon: 'fa-align-left' },
+            { id: 'canker', name: 'แผลร้อนใน (Canker Sore)', icon: 'fa-circle' },
+            { id: 'cancer', name: 'ความเสี่ยงมะเร็งช่องปาก (Oral Cancer Risk)', icon: 'fa-shield-virus' }
+        ];
+
+        // แก้ไข 9 จุด สำหรับ Check list ให้ใช้ Icon ผสมผสานที่สื่อความหมายชัดเจน
+        const scanAreas = [
+            { id: 1, name: 'ฟันด้านหน้า', htmlIcon: '<i class="fas fa-teeth text-base"></i>', guide: 'ขยับแปรงมาส่องบริเวณฟันหน้าตรงกลาง' },
+            { id: 2, name: 'ฟันบน', htmlIcon: '<div class="flex flex-col items-center leading-none"><i class="fas fa-caret-up text-[10px]"></i><i class="fas fa-tooth text-[12px]"></i></div>', guide: 'หงายมุมกล้องขึ้นตรวจแถวฟันบนทั้งหมด' },
+            { id: 3, name: 'ฟันล่าง', htmlIcon: '<div class="flex flex-col items-center leading-none"><i class="fas fa-tooth text-[12px]"></i><i class="fas fa-caret-down text-[10px]"></i></div>', guide: 'คว่ำมุมกล้องลงตรวจแนวฟันล่าง' },
+            { id: 4, name: 'แก้มซ้าย', htmlIcon: '<div class="flex items-center"><i class="fas fa-caret-left text-[10px] mr-1"></i><i class="fas fa-head-side-mask text-[12px]"></i></div>', guide: 'เบนหัวแปรงไปสแกนเยื่อบุกระพุ้งแก้มซ้าย' },
+            { id: 5, name: 'แก้มขวา', htmlIcon: '<div class="flex items-center"><i class="fas fa-head-side-mask text-[12px]"></i><i class="fas fa-caret-right text-[10px] ml-1"></i></div>', guide: 'เบนหัวแปรงไปสแกนเยื่อบุกระพุ้งแก้มขวา' },
+            { id: 6, name: 'เพดานปาก', htmlIcon: '<i class="fas fa-arrow-up-from-bracket text-[12px]"></i>', guide: 'ส่องกล้องขึ้นตรงบริเวณเพดานปากด้านบน' },
+            { id: 7, name: 'ลิ้น', htmlIcon: '<i class="fas fa-face-grin-tongue text-[14px]"></i>', guide: 'แลบลิ้นเล็กน้อยเพื่อตรวจคราบบนผิวลิ้น' },
+            { id: 8, name: 'ฟันกรามซ้าย', htmlIcon: '<div class="flex items-center"><i class="fas fa-angle-double-left text-[10px] mr-0.5"></i><i class="fas fa-tooth text-[12px]"></i></div>', guide: 'ดันแปรงเข้าไปลึกสุดที่ฟันกรามฝั่งซ้าย' },
+            { id: 9, name: 'ฟันกรามขวา', htmlIcon: '<div class="flex items-center"><i class="fas fa-tooth text-[12px]"></i><i class="fas fa-angle-double-right text-[10px] ml-0.5"></i></div>', guide: 'ย้ายแปรงไปสแกนฟันกรามซี่ในสุดฝั่งขวา' }
+        ];
+
+        function navigateTo(screenId) {
+            ['screen-login', 'screen-main', 'screen-loading', 'screen-scan-ui', 'screen-results', 'screen-history'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('main-user-name').innerText = user.displayName || "ผู้ใช้งาน GlowGrip";
+                navigateTo('screen-main');
+                fetchDashboardStats();
+            } else {
+                navigateTo('screen-login');
+            }
+        });
+
+        function toggleAuthMode(toRegister) {
+            isRegisterMode = toRegister;
+            const nameField = document.getElementById('div-name-field');
+            const primaryBtn = document.getElementById('btn-primary-auth');
+            const toggleText = document.getElementById('auth-toggle-text');
+
+            if (toRegister) {
+                nameField.classList.remove('hidden');
+                primaryBtn.innerText = "สมัครสมาชิก";
+                toggleText.innerHTML = `มีบัญชีอยู่แล้ว? <a href="#" onclick="toggleAuthMode(false)" class="text-[#52C2C2] font-medium hover:underline">เข้าสู่ระบบที่นี่</a>`;
+            } else {
+                nameField.classList.add('hidden');
+                primaryBtn.innerText = "เข้าสู่ระบบ";
+                toggleText.innerHTML = `ยังไม่มีบัญชี? <a href="#" onclick="toggleAuthMode(true)" class="text-[#52C2C2] font-medium hover:underline">สมัครสมาชิก</a>`;
+            }
+        }
+
+        function handlePrimaryAuth() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const name = document.getElementById('auth-name').value.trim();
+
+            if(!email || !password) { alert("กรุณากรอกข้อมูลให้ครบถ้วน"); return; }
+
+            if (isRegisterMode) {
+                if(!name) { alert("กรุณาระบุชื่อสมาชิกร่วมด้วย"); return; }
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((cred) => cred.user.updateProfile({ displayName: name }))
+                    .then(() => alert("สมัครสมาชิกและเข้าสู่ระบบสำเร็จ"))
+                    .catch((err) => alert(err.message));
+            } else {
+                auth.signInWithEmailAndPassword(email, password).catch((err) => alert("อีเมลหรือรหัสผ่านผิดพลาด: " + err.message));
+            }
+        }
+
+        function loginWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch((err) => alert(err.message));
+        }
+
+        function handleLogout() {
+            if(confirm("ยืนยันออกจากระบบ?")) auth.signOut();
+        }
+
+        function fetchDashboardStats() {
+            const user = auth.currentUser;
+            if(!user) return;
+
+            db.collection("scan_history")
+              .where("uid", "==", user.uid)
+              .orderBy("timestamp", "desc")
+              .limit(1)
+              .get()
+              .then((snapshot) => {
+                  const scoreCircle = document.getElementById('score-circle-path');
+                  const scoreTxt = document.getElementById('main-score');
+                  const statusBadge = document.getElementById('main-status-badge');
+                  const dateTxt = document.getElementById('main-date');
+                  const riskBadge = document.getElementById('main-risk-badge');
+
+                  if (!snapshot.empty) {
+                      const data = snapshot.docs[0].data();
+                      const score = data.score || 0;
+                      scoreTxt.innerText = `${score}%`;
+                      scoreCircle.setAttribute('stroke-dasharray', `${score}, 100`);
+                      dateTxt.innerText = data.dateStr ? data.dateStr.split(' ')[0] + ' ' + data.dateStr.split(' ')[1] : '--';
+                      
+                      if(score >= 75) {
+                          statusBadge.innerText = "ดี"; statusBadge.className = "mt-1 bg-emerald-100 text-emerald-700 px-3 py-0.5 rounded-full text-[11px] font-medium";
+                          riskBadge.innerText = "ต่ำ"; riskBadge.className = "bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-semibold";
+                      } else {
+                          statusBadge.innerText = "เสี่ยง"; statusBadge.className = "mt-1 bg-amber-100 text-amber-700 px-3 py-0.5 rounded-full text-[11px] font-medium";
+                          riskBadge.innerText = "ปานกลาง-สูง"; riskBadge.className = "bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded text-[10px] font-semibold";
+                      }
+                  }
+              }).catch(err => console.log(err));
+        }
+
+        function startCameraConnection(mode) {
+            currentMode = mode;
+            navigateTo('screen-loading');
+            setTimeout(() => {
+                initiateScanningInterface();
+            }, 3500);
+        }
+
+        function initiateScanningInterface() {
+            navigateTo('screen-scan-ui');
+            const title = document.getElementById('scan-title');
+            const subtitle = document.getElementById('scan-subtitle');
+            const overlayText = document.getElementById('scan-overlay-text');
+            const bgImage = document.getElementById('scan-bg-image');
+            
+            const mappingUI = document.getElementById('mapping-ui-container');
+            const assessUI = document.getElementById('assessment-ui-container');
+            
+            if (currentMode === 'mapping') {
+                mappingUI.classList.remove('hidden');
+                assessUI.classList.add('hidden');
+                
+                title.innerText = "เก็บข้อมูลเริ่มต้น (Calibration)";
+                subtitle.innerText = "กำลังจัดทำแผนที่พื้นผิวฟันส่วนบุคคล";
+                bgImage.src = "https://images.unsplash.com/photo-1598256989800-fe5f95da9787?auto=format&fit=crop&w=600&q=80";
+                overlayText.innerHTML = "การเชื่อมต่อเพื่อเก็บข้อมูลฟัน เพื่อบันทึกรูปแบบโครงสร้างช่องปาก สำหรับการวิเคราะห์ที่ครอบคลุม 100%";
+            } else {
+                mappingUI.classList.add('hidden');
+                assessUI.classList.remove('hidden');
+                
+                title.innerText = "ประเมินความเสี่ยงโรคในช่องปาก";
+                subtitle.innerText = "AI Live Tracking ตรวจสอบช่องปาก";
+                bgImage.src = "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=600&q=80";
+                overlayText.innerHTML = "ผู้ใช้ใช้แปรงสีฟันเชื่อมต่อกับแอปเพื่อตรวจสอบความเสี่ยง โดยระบบจะนำทางให้สแกนอย่างทั่วถึง";
+
+                // แสดงตารางเช็คลิสต์แบบใหม่ที่เข้าใจง่ายขึ้น
+                const gridContainer = document.getElementById('scan-grid-container');
+                gridContainer.innerHTML = scanAreas.map(area => `
+                    <div id="scan-item-${area.id}" class="flex items-center p-2 bg-white border border-slate-100 rounded-xl shadow-xs opacity-40 transition-all duration-300">
+                        <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center mr-2 text-slate-500 icon-wrapper transition-colors shrink-0">
+                            ${area.htmlIcon}
+                        </div>
+                        <span class="text-[11px] font-medium text-slate-600 flex-1">${area.name}</span>
+                        <i class="far fa-circle text-slate-200 text-[14px] check-icon shrink-0"></i>
+                    </div>
+                `).join('');
+            }
+
+            runChecklistProgressSimulation();
+        }
+
+        function runChecklistProgressSimulation() {
+            let progress = 0;
+            const progressBar = document.getElementById('scan-progress-bar');
+            const progressTxt = document.getElementById('scan-progress-txt');
+            const liveGuide = document.getElementById('scan-live-guide');
+            const mappingCircle = document.getElementById('mapping-circle');
+            const mappingInstruction = document.getElementById('mapping-instruction');
+
+            progressBar.style.width = '0%';
+            progressTxt.innerText = '0%';
+            if(currentMode === 'assessment') liveGuide.innerText = scanAreas[0].guide;
+
+            let checkedCount = 0;
+            const totalSteps = 100;
+            const totalDuration = 10000;
+            const intervalTime = totalDuration / totalSteps;
+
+            const directions = ['up', 'down', 'left', 'right', 'center'];
+            const mappingText = ['หันหน้าและแปรงขึ้น', 'หันหน้าและแปรงลง', 'หันแปรงไปทางซ้าย', 'หันแปรงไปทางขวา', 'วางแปรงตรงกลางและค้างไว้'];
+
+            scanInterval = setInterval(() => {
+                progress += 1;
+                progressBar.style.width = `${progress}%`;
+                progressTxt.innerText = `${progress}%`;
+
+                if (currentMode === 'mapping') {
+                    const circleDash = (progress / 100) * 300;
+                    mappingCircle.setAttribute('stroke-dasharray', `${circleDash} 300`);
+
+                    const dirIndex = Math.floor((progress / 100) * 5);
+                    if(dirIndex < 5) {
+                        mappingInstruction.innerText = mappingText[dirIndex];
+                        ['up', 'down', 'left', 'right'].forEach(d => {
+                            const icon = document.getElementById(`dir-${d}`);
+                            if(icon) {
+                                icon.classList.remove('arrow-active');
+                                icon.classList.add('arrow-inactive');
+                            }
+                        });
+                        if(directions[dirIndex] !== 'center') {
+                            const activeIcon = document.getElementById(`dir-${directions[dirIndex]}`);
+                            if(activeIcon) {
+                                activeIcon.classList.remove('arrow-inactive');
+                                activeIcon.classList.add('arrow-active');
+                            }
+                        }
+                    }
+                } 
+                else {
+                    const pointIndex = Math.floor((progress / 100) * 9);
+                    if (pointIndex > checkedCount && pointIndex <= 9) {
+                        checkedCount = pointIndex;
+                        
+                        const targetItem = document.getElementById(`scan-item-${checkedCount}`);
+                        if(targetItem) {
+                            targetItem.classList.remove('opacity-40');
+                            targetItem.classList.add('border-teal-200', 'bg-teal-50/50');
+                            
+                            const iconBox = targetItem.querySelector('.icon-wrapper');
+                            iconBox.classList.remove('bg-slate-50', 'text-slate-500');
+                            iconBox.classList.add('bg-[#52C2C2]', 'text-white');
+
+                            const mark = targetItem.querySelector('.check-icon');
+                            mark.className = 'fas fa-check-circle text-[#52C2C2] text-[16px] check-icon animate-[bounce_0.5s_1]';
+                        }
+
+                        if (checkedCount < 9) {
+                            liveGuide.innerText = scanAreas[checkedCount].guide;
+                        }
+                    }
+                }
+
+                if (progress >= 100) {
+                    clearInterval(scanInterval);
+                    setTimeout(() => {
+                        if (currentMode === 'mapping') {
+                            alert("เก็บบันทึกแผนผังช่องปาก ครบ 100% สำเร็จแล้ว!");
+                            stopScanningAndGoHome();
+                        } else {
+                            renderAIAnalysisResults();
+                        }
+                    }, 400);
+                }
+            }, intervalTime);
+        }
+
+        function stopScanningAndGoHome() {
+            clearInterval(scanInterval);
+            navigateTo('screen-main');
+        }
+
+        function renderAIAnalysisResults() {
+            navigateTo('screen-results');
+            const container = document.getElementById('risk-bars-container');
+            container.innerHTML = '';
+            temporaryResults = [];
+            let aggregateRisk = 0;
+
+            diseases.forEach(d => {
+                const randomPct = Math.floor(Math.random() * 65) + 15;
+                temporaryResults.push({ id: d.id, name: d.name, score: randomPct, icon: d.icon });
+                aggregateRisk += randomPct;
+
+                let barColor = "bg-emerald-500";
+                let textColor = "text-emerald-600";
+                if(randomPct > 35 && randomPct <= 65) {
+                    barColor = "bg-amber-500"; textColor = "text-amber-600";
+                } else if(randomPct > 65) {
+                    barColor = "bg-red-500"; textColor = "text-red-600";
+                }
+
+                container.innerHTML += `
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 shadow-xs">
+                        <div class="flex justify-between items-center text-xs mb-1">
+                            <span class="font-medium text-slate-700 flex items-center gap-1.5">
+                                <i class="fas ${d.icon} text-slate-400 text-[11px]"></i>${d.name}
+                            </span>
+                            <span class="font-bold ${textColor}">${randomPct}% ความมั่นใจ</span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div class="h-full ${barColor}" style="width: ${randomPct}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            lastHealthScore = Math.max(20, Math.floor(100 - (aggregateRisk / diseases.length)));
+        }
+
+        function saveResultsToFirebase() {
+            const user = auth.currentUser;
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) + " น.";
+
+            const payload = {
+                uid: user ? user.uid : "anonymous_trial_id",
+                score: lastHealthScore,
+                details: temporaryResults,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                dateStr: dateStr
+            };
+
+            if (user) {
+                db.collection("scan_history").add(payload)
+                    .then(() => {
+                        alert("อัปเดตและบันทึกประวัติขึ้นระบบคลาวด์เสร็จสิ้น");
+                        fetchDashboardStats();
+                        navigateTo('screen-main');
+                    }).catch(err => alert("ข้อผิดพลาดระบบ DB: " + err.message));
+            } else {
+                alert("บันทึกข้อมูลแบบจำลองเสร็จสิ้น (โหมดออฟไลน์)");
+                navigateTo('screen-main');
+            }
+        }
+
+        function openHistory() {
+            navigateTo('screen-history');
+            const container = document.getElementById('history-list-container');
+            const emptyView = document.getElementById('history-empty-view');
+
+            container.querySelectorAll('.history-card').forEach(el => el.remove());
+            emptyView.classList.add('hidden');
+
+            const user = auth.currentUser;
+            if(!user) { emptyView.classList.remove('hidden'); return; }
+
+            db.collection("scan_history")
+              .where("uid", "==", user.uid)
+              .orderBy("timestamp", "desc")
+              .get()
+              .then(snapshot => {
+                  if(snapshot.empty) {
+                      emptyView.classList.remove('hidden');
+                  } else {
+                      let index = snapshot.size;
+                      snapshot.forEach(doc => {
+                          const data = doc.data();
+                          let scoreBg = data.score >= 75 ? "bg-emerald-500" : "bg-amber-500";
+
+                          container.innerHTML += `
+                              <div class="history-card bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs flex justify-between items-center">
+                                  <div>
+                                      <span class="text-[10px] text-slate-400 font-sans block">${data.dateStr || ''}</span>
+                                      <h4 class="font-bold text-slate-800 text-sm mt-0.5">รอบบันทึกการสแกน #${index}</h4>
+                                      <p class="text-[11px] text-slate-500 mt-0.5"><i class="fas fa-bullseye text-teal-500 mr-1"></i>วิเคราะห์สำเร็จครบถ้วน</p>
+                                  </div>
+                                  <div class="${scoreBg} text-white w-11 h-11 rounded-xl flex flex-col items-center justify-center font-sans">
+                                      <span class="text-[9px] opacity-80 leading-none">Score</span>
+                                      <span class="text-sm font-bold">${data.score}</span>
+                                  </div>
+                              </div>
+                          `;
+                          index--;
+                      });
+                  }
+              }).catch(err => console.log(err));
+        }
+    </script>
+</body>
+</html>
