@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GlowGrip Prototype - Full Features</title>
+    <title>DentiScan Prototype - Full Features</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -33,7 +33,7 @@
                         <path d="M20 7 l2 -2 m0 4 l-2 -2 m2 0 h3" stroke-width="1" class="text-[#52C2C2] opacity-70"></path>
                     </svg>
                 </div>
-                <h1 class="text-[32px] font-semibold text-[#52C2C2] tracking-wide mb-1">GlowGrip</h1>
+                <h1 class="text-[32px] font-semibold text-[#52C2C2] tracking-wide mb-1">DentiScan</h1>
                 <p class="text-slate-500 text-[15px] leading-snug">ตรวจสุขภาพช่องปาก<br>ง่าย ๆ แค่แปรงฟัน</p>
             </div>
 
@@ -45,7 +45,7 @@
 
                 <div class="relative">
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"><i class="far fa-user"></i></span>
-                    <input type="email" id="auth-email" placeholder="Username / Email" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#52C2C2] text-sm transition-colors">
+                    <input type="text" id="auth-email" placeholder="Username / Email" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#52C2C2] text-sm transition-colors">
                 </div>
 
                 <div class="relative">
@@ -136,6 +136,10 @@
                         </div>
                     </div>
                 </div>
+                
+                <button onclick="openRiskDetails()" class="w-full mt-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-medium py-2 rounded-xl text-xs transition flex justify-center items-center gap-2">
+                    <i class="fas fa-chart-pie"></i> ดูรายละเอียดความเสี่ยงแต่ละโรค
+                </button>
             </div>
 
             <div class="grid grid-cols-3 gap-2.5 mb-4">
@@ -206,7 +210,7 @@
                     </div>
                 </div>
             </div>
-            <h3 class="text-base font-medium text-center px-4 leading-snug tracking-wide">กำลังทำการเชื่อมต่อกับแปรงสีฟัน Glowgrip</h3>
+            <h3 class="text-base font-medium text-center px-4 leading-snug tracking-wide">กำลังทำการเชื่อมต่อกับแปรงสีฟัน DentiScan</h3>
         </div>
 
         <!-- ================= SCAN UI (MAPPING & ASSESSMENT) ================= -->
@@ -311,6 +315,19 @@
             </div>
         </div>
 
+        <!-- ================= RISK DETAILS SCREEN ================= -->
+        <div id="screen-risk-details" class="flex-1 flex flex-col p-5 bg-[#F4F9FC] hidden">
+            <div class="flex items-center gap-3 mb-4">
+                <button onclick="navigateTo('screen-main')" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 shadow-sm">
+                    <i class="fas fa-arrow-left text-xs"></i>
+                </button>
+                <h3 class="text-lg font-bold text-slate-800">ผลประเมินความเสี่ยง</h3>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-3" id="risk-details-container">
+                <!-- Data will be populated via JS -->
+            </div>
+        </div>
+
         <!-- ================= HISTORY SCREEN ================= -->
         <div id="screen-history" class="flex-1 flex flex-col p-5 bg-[#F4F9FC] hidden">
             <div class="flex items-center gap-3 mb-4">
@@ -358,7 +375,6 @@
             { id: 'cancer', name: 'ความเสี่ยงมะเร็งช่องปาก (Oral Cancer Risk)', icon: 'fa-shield-virus' }
         ];
 
-        // แก้ไข 9 จุด สำหรับ Check list ให้ใช้ Icon ผสมผสานที่สื่อความหมายชัดเจน
         const scanAreas = [
             { id: 1, name: 'ฟันด้านหน้า', htmlIcon: '<i class="fas fa-teeth text-base"></i>', guide: 'ขยับแปรงมาส่องบริเวณฟันหน้าตรงกลาง' },
             { id: 2, name: 'ฟันบน', htmlIcon: '<div class="flex flex-col items-center leading-none"><i class="fas fa-caret-up text-[10px]"></i><i class="fas fa-tooth text-[12px]"></i></div>', guide: 'หงายมุมกล้องขึ้นตรวจแถวฟันบนทั้งหมด' },
@@ -372,15 +388,16 @@
         ];
 
         function navigateTo(screenId) {
-            ['screen-login', 'screen-main', 'screen-loading', 'screen-scan-ui', 'screen-results', 'screen-history'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
+            ['screen-login', 'screen-main', 'screen-loading', 'screen-scan-ui', 'screen-results', 'screen-history', 'screen-risk-details'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
         }
 
         auth.onAuthStateChanged((user) => {
             if (user) {
-                document.getElementById('main-user-name').innerText = user.displayName || "ผู้ใช้งาน GlowGrip";
+                document.getElementById('main-user-name').innerText = user.displayName || "ผู้ใช้งาน DentiScan";
                 navigateTo('screen-main');
                 fetchDashboardStats();
             } else {
@@ -406,11 +423,13 @@
         }
 
         function handlePrimaryAuth() {
-            const email = document.getElementById('auth-email').value.trim();
+            let emailInput = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value.trim();
             const name = document.getElementById('auth-name').value.trim();
 
-            if(!email || !password) { alert("กรุณากรอกข้อมูลให้ครบถ้วน"); return; }
+            if(!emailInput || !password) { alert("กรุณากรอกข้อมูลให้ครบถ้วน"); return; }
+            
+            const email = emailInput.includes('@') ? emailInput : `${emailInput}@dentiscan.app`;
 
             if (isRegisterMode) {
                 if(!name) { alert("กรุณาระบุชื่อสมาชิกร่วมด้วย"); return; }
@@ -419,7 +438,7 @@
                     .then(() => alert("สมัครสมาชิกและเข้าสู่ระบบสำเร็จ"))
                     .catch((err) => alert(err.message));
             } else {
-                auth.signInWithEmailAndPassword(email, password).catch((err) => alert("อีเมลหรือรหัสผ่านผิดพลาด: " + err.message));
+                auth.signInWithEmailAndPassword(email, password).catch((err) => alert("ชื่อผู้ใช้/อีเมลหรือรหัสผ่านผิดพลาด: " + err.message));
             }
         }
 
@@ -462,6 +481,8 @@
                           statusBadge.innerText = "เสี่ยง"; statusBadge.className = "mt-1 bg-amber-100 text-amber-700 px-3 py-0.5 rounded-full text-[11px] font-medium";
                           riskBadge.innerText = "ปานกลาง-สูง"; riskBadge.className = "bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded text-[10px] font-semibold";
                       }
+                      
+                      temporaryResults = data.details || [];
                   }
               }).catch(err => console.log(err));
         }
@@ -501,7 +522,6 @@
                 bgImage.src = "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=600&q=80";
                 overlayText.innerHTML = "ผู้ใช้ใช้แปรงสีฟันเชื่อมต่อกับแอปเพื่อตรวจสอบความเสี่ยง โดยระบบจะนำทางให้สแกนอย่างทั่วถึง";
 
-                // แสดงตารางเช็คลิสต์แบบใหม่ที่เข้าใจง่ายขึ้น
                 const gridContainer = document.getElementById('scan-grid-container');
                 gridContainer.innerHTML = scanAreas.map(area => `
                     <div id="scan-item-${area.id}" class="flex items-center p-2 bg-white border border-slate-100 rounded-xl shadow-xs opacity-40 transition-all duration-300">
@@ -616,7 +636,7 @@
             let aggregateRisk = 0;
 
             diseases.forEach(d => {
-                const randomPct = Math.floor(Math.random() * 65) + 15;
+                const randomPct = Math.floor(Math.random() * 85) + 5;
                 temporaryResults.push({ id: d.id, name: d.name, score: randomPct, icon: d.icon });
                 aggregateRisk += randomPct;
 
@@ -634,7 +654,7 @@
                             <span class="font-medium text-slate-700 flex items-center gap-1.5">
                                 <i class="fas ${d.icon} text-slate-400 text-[11px]"></i>${d.name}
                             </span>
-                            <span class="font-bold ${textColor}">${randomPct}% ความมั่นใจ</span>
+                            <span class="font-bold ${textColor}">${randomPct}% ความเสี่ยง</span>
                         </div>
                         <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
                             <div class="h-full ${barColor}" style="width: ${randomPct}%"></div>
@@ -672,6 +692,51 @@
             }
         }
 
+        function openRiskDetails() {
+            navigateTo('screen-risk-details');
+            const container = document.getElementById('risk-details-container');
+            container.innerHTML = '';
+
+            if(!temporaryResults || temporaryResults.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 py-12 text-sm">ยังไม่มีข้อมูลการสแกน</div>';
+                return;
+            }
+
+            temporaryResults.forEach(d => {
+                let emoji = "😊";
+                let emojiColor = "text-emerald-500 bg-emerald-100";
+                let barColor = "bg-emerald-500";
+
+                if (d.score > 35 && d.score <= 65) {
+                    emoji = "😐";
+                    emojiColor = "text-amber-500 bg-amber-100";
+                    barColor = "bg-amber-500";
+                } else if (d.score > 65) {
+                    emoji = "☹️";
+                    emojiColor = "text-red-500 bg-red-100";
+                    barColor = "bg-red-500";
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full ${emojiColor} flex items-center justify-center text-2xl shrink-0">
+                            ${emoji}
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-sm font-bold text-slate-800 mb-1">${d.name}</h4>
+                            <div class="flex justify-between items-center text-xs mb-1">
+                                <span class="text-slate-500">ระดับความเสี่ยง</span>
+                                <span class="font-bold text-slate-700">${d.score}%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="h-full ${barColor}" style="width: ${d.score}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
         function openHistory() {
             navigateTo('screen-history');
             const container = document.getElementById('history-list-container');
@@ -695,18 +760,28 @@
                       snapshot.forEach(doc => {
                           const data = doc.data();
                           let scoreBg = data.score >= 75 ? "bg-emerald-500" : "bg-amber-500";
+                          
+                          let detailsHtml = '';
+                          if(data.details) {
+                              detailsHtml = data.details.map(d => {
+                                  let dotColor = d.score > 65 ? 'text-red-500' : (d.score > 35 ? 'text-amber-500' : 'text-emerald-500');
+                                  return `<div class="flex justify-between items-center mt-1"><span class="text-[10px] text-slate-500 flex items-center gap-1"><i class="fas fa-circle ${dotColor} text-[6px]"></i> ${d.name}</span><span class="text-[10px] font-medium text-slate-600">${d.score}%</span></div>`;
+                              }).join('');
+                          }
 
                           container.innerHTML += `
-                              <div class="history-card bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs flex justify-between items-center">
-                                  <div>
-                                      <span class="text-[10px] text-slate-400 font-sans block">${data.dateStr || ''}</span>
-                                      <h4 class="font-bold text-slate-800 text-sm mt-0.5">รอบบันทึกการสแกน #${index}</h4>
-                                      <p class="text-[11px] text-slate-500 mt-0.5"><i class="fas fa-bullseye text-teal-500 mr-1"></i>วิเคราะห์สำเร็จครบถ้วน</p>
+                              <div class="history-card bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs flex flex-col gap-2">
+                                  <div class="flex justify-between items-center">
+                                      <div>
+                                          <span class="text-[10px] text-slate-400 font-sans block">${data.dateStr || ''}</span>
+                                          <h4 class="font-bold text-slate-800 text-sm mt-0.5">รอบบันทึกการสแกน #${index}</h4>
+                                      </div>
+                                      <div class="${scoreBg} text-white w-10 h-10 rounded-xl flex flex-col items-center justify-center font-sans">
+                                          <span class="text-[8px] opacity-80 leading-none">Score</span>
+                                          <span class="text-sm font-bold">${data.score}</span>
+                                      </div>
                                   </div>
-                                  <div class="${scoreBg} text-white w-11 h-11 rounded-xl flex flex-col items-center justify-center font-sans">
-                                      <span class="text-[9px] opacity-80 leading-none">Score</span>
-                                      <span class="text-sm font-bold">${data.score}</span>
-                                  </div>
+                                  ${detailsHtml ? `<div class="border-t border-slate-50 pt-2 mt-1">${detailsHtml}</div>` : ''}
                               </div>
                           `;
                           index--;
